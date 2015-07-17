@@ -8,16 +8,122 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	//"strings"
+	"strconv"
+	"strings"
 )
 
 var logfile *os.File
 var logger *log.Logger
 var target string
-var mode, static_version, hotfix_version string
+var mode, static_version, hotfix_version, server_id, ip string
+var ips []string
 
 type Configfile struct {
 	filestring string
+}
+
+func (filedata *Configfile) addnew_line(path, server_id string, ips []string) {
+	logger.Println("===The new server id is", server_id)
+	logger.Println("===The Gip of this server is ", ip)
+	server_idint, err := strconv.Atoi(server_id)
+	if err != nil {
+		logger.Println(err.Error())
+		os.Exit(1)
+	}
+	server_id1 := server_idint - 4
+	server_id2 := strconv.Itoa(server_id1)
+
+	var a1, a2 string
+	argv1 := []string{"-n", "2p", path}
+	a := exec.Command("sed", argv1...)
+	argv2 := []string{"-n", "2,10000p", path}
+	b := exec.Command("sed", argv2...)
+	argv3 := []string{"-n", "1p", path}
+	c := exec.Command("sed", argv3...)
+	d1, _ := a.Output()
+	d2, _ := b.Output()
+	d3, _ := c.Output()
+
+	c1 := string(d1)
+	c2 := string(d2)
+	c3 := string(d3)
+
+	filedata1, _ := regexp.Compile("nba_redis[0-9]+")
+	n1 := "nba_redis" + server_id
+	a1 = filedata1.ReplaceAllString(c1, n1)
+
+	filedata2, _ := regexp.Compile("{_id:[0-9]*")
+	n2 := "{_id:" + server_id
+	a2 = filedata2.ReplaceAllString(a1, n2)
+
+	filedata3, _ := regexp.Compile("game:[^]]*]")
+	lenofip := len(ips)
+	n3 := "game:["
+	for k, v := range ips {
+
+		if k != lenofip-1 {
+			n3 = n3 + "{h:'" + v + "',p:8601}," + "{h:'" + v + "',p:8602}," + "{h:'" + v + "',p:8603}," + "{h:'" + v + "',p:8604},"
+		} else if k == lenofip-1 {
+			n3 = n3 + "{h:'" + v + "',p:8601}," + "{h:'" + v + "',p:8602}," + "{h:'" + v + "',p:8603}," + "{h:'" + v + "',p:8604}"
+
+		}
+	}
+	n4 := n3 + "]"
+	a3 := filedata3.ReplaceAllString(a2, n4)
+
+	filedata5, _ := regexp.Compile(",n:'[^'']*'")
+	n5 := ",n:'" + "公测" + server_id2 + "区[00ff00](新)[-]'"
+	a5 := filedata5.ReplaceAllString(a3, n5)
+
+	filedata6, _ := regexp.Compile(",v:[0-9]*,w:[0-9]*,")
+	n6 := ",v:0,w:1,"
+	a6 := filedata6.ReplaceAllString(a5, n6)
+
+	filedata.filestring = c3 + a6 + c2
+	logger.Println(filedata.filestring)
+
+}
+
+//批量重启服务器
+func reload_instance(reload_mode string) {
+	if reload_mode == "gs" {
+		argv1 := []strings{"/nba/nba.pl", "-s", "gs", "-w", "1", "-t", "web", "-o", "restart", "-a", "yes"}
+		c1 := exec.Command("perl", argv1...)
+		d1, err := c1.Output()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		logger.Println(d1)
+	}
+	if reload_mode == "ca" {
+		argv2 := []strings{"/nba/nba.pl", "-s", "ca", "-w", "1", "-t", "web", "-o", "restart", "-a", "yes"}
+		c2 := exec.Command("perl", argv2...)
+		d2, err1 := c2.Output()
+		if err1 != nil {
+			logger.Println(err1.Error())
+			os.Exit(1)
+		}
+		logger.Println(d2)
+	}
+	if reload_mode == "login" {
+		argv3 := []strings{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8200", "-o", "restart"}
+		c3 := exec.Command("perl", argv3...)
+		d3, err3 := c3.Output()
+		if err3 != nil {
+			logger.Println(err3.Error())
+			os.Exit(1)
+		}
+		logger.Println(d3)
+		argv4 := []strings{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8100", "-o", "restart"}
+		c4 := exec.Command("perl", argv4...)
+		d4, err4 := c4.Output()
+		if err4 != nil {
+			logger.Println(err4.Error())
+			os.Exit(1)
+		}
+		logger.Println(d4)
+	}
 }
 
 //批量更新代码
@@ -33,7 +139,7 @@ func pull_code() {
 	logger.Println(d)
 
 	argv1 := []string{"/nba/full.git.zl", "redis", "pull"}
-	c1 := exec.Command("perl", argv...)
+	c1 := exec.Command("perl", argv1...)
 	d1, err1 := c1.Output()
 	logger.Println("=== start pull code on redis server ")
 	if err1 != nil {
@@ -43,7 +149,7 @@ func pull_code() {
 	logger.Println(d1)
 
 	argv2 := []string{"/nba/full.git.zl", "login", "pull", "8100"}
-	c2 := exec.Command("perl", argv...)
+	c2 := exec.Command("perl", argv2...)
 	d2, err2 := c2.Output()
 	logger.Println("=== start pull code on login 8100 ")
 	if err2 != nil {
@@ -53,7 +159,7 @@ func pull_code() {
 	logger.Println(d2)
 
 	argv3 := []string{"/nba/full.git.zl", "login", "pull"}
-	c3 := exec.Command("perl", argv...)
+	c3 := exec.Command("perl", argv3...)
 	d3, err3 := c3.Output()
 	logger.Println("=== start pull code on login 8200 ")
 	if err3 != nil {
@@ -240,6 +346,8 @@ func main() {
 	flag.StringVar(&hotfix_version, "h_v", "", "The version number of hotfix data")
 	flag.StringVar(&static_version, "s_v", "", "The version number of statistics data")
 	flag.StringVar(&target, "target", "", "Whether cn or tw")
+	flag.StringVar(&server_id, "server_id", "", "The new server id")
+	flag.StringVar(&ip, "ip", "", "The new server gips like 1.1.1.1,2.2.2.2,3.3.3.3")
 	flag.Parse()
 
 	if target == "cn" {
@@ -251,6 +359,9 @@ func main() {
 
 		filepath = "/data/nba/nba_game_server/app/config_data_tw/server_config_TW_PROD.js"
 		filepath_bk = "/tmp/server_config_TW_PROD.bk.js"
+	}
+	if ip != "" {
+		ips = strings.Split(ip, ",")
 	}
 	//建立日志文件，并初始化日志文件
 	logfile, err1 = os.OpenFile("./edc_log.log", os.O_RDWR|os.O_CREATE, 0666)
@@ -268,35 +379,47 @@ func main() {
 	logger.Println("=====job start.=====")
 	if mode == "" {
 		logger.Println("The mode is error pls check the input")
+		logger.Println("mode :1 change statictics file version or hotfix version")
+		logger.Println("mode :2 add new server line")
 		os.Exit(1)
 	}
+	logger.Println("=== mode ", mode, " ===")
 
 	if target == "" {
 		logger.Println("The target is error pls check the input")
 		os.Exit(1)
 	}
+
+	//===Mode为1
 	//只更新静态数据版本
-	if mode != "" && static_version != "" && hotfix_version == "" && target != "" {
+	if mode == "1" && static_version != "" && hotfix_version == "" && target != "" {
 
 		filedata := copyconfig(filepath, filepath_bk)
 		filedata.changes_v()
 		filedata.writeconfig(filepath)
 
 	}
-	//只更新hotfix版本
-	if mode != "" && static_version == "" && hotfix_version != "" && target != "" {
+	//只更新hotfix 版本
+	if mode == "1" && static_version == "" && hotfix_version != "" && target != "" {
+		logger.Println("123")
 		filedata := copyconfig(filepath, filepath_bk)
 		filedata.changeh_v()
 		filedata.writeconfig(filepath)
 
 	}
-	//静态数据和hotgix版本都更新
-	if mode != "" && static_version != "" && hotfix_version != "" && target != "" {
+	//同时更新静态数据与hotfix
+	if mode == "1" && static_version != "" && hotfix_version != "" && target != "" {
 		filedata := copyconfig(filepath, filepath_bk)
 		filedata.changeh_v()
 		filedata.changes_v()
 		filedata.writeconfig(filepath)
 
+	}
+	//===Mode为2
+	if mode == "2" && ip != "" && server_id != "" && target != "" {
+		filedata := copyconfig(filepath, filepath_bk)
+		filedata.addnew_line(filepath, server_id, ips)
+		filedata.writeconfig(filepath)
 	}
 
 }
