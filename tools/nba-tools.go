@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var logfile *os.File
@@ -302,7 +303,7 @@ func (filedata *Configfile) copyconfig(filepath, filepath_bk string) *Configfile
 
 	//删除old bk file
 
-	removefle(filepath_bk)
+	//removefle(filepath_bk)
 
 	//写新的 bk file
 	newfile, err3 := os.OpenFile(filepath_bk, os.O_RDWR|os.O_CREATE, 0666)
@@ -323,7 +324,7 @@ func (filedata *Configfile) copyconfig(filepath, filepath_bk string) *Configfile
 func (filedata *Configfile) writeconfig(filepath string) {
 	//更新配置文件
 	//删除老的配置文件
-	removefle(filepath)
+	//removefle(filepath)
 
 	logger.Println("===start write new config")
 	configfile, err5 := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)
@@ -377,16 +378,17 @@ func main() {
 
 	//定义filedata
 	filedata := &Configfile{"", nil, nil}
-
+	//timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	if target == "cn" {
 		//filepath := "/data/nba/nba_game_server/app/config_data_cn/server_config_CN_PROD.js"
 		//filepath_bk:="/tmp/server_config_CN_PROD.bk.js"
 		filepath = "/Users/zhou.liyang/Desktop/server_config_CN_PROD.js"
-		filepath_bk = "/Users/zhou.liyang/Desktop/server_config_CN_PROD.bk.js"
+		filepath_bk = "/Users/zhou.liyang/Desktop/server_config_CN_PROD.bk." + timestamp + ".js"
 	} else if target == "tw" {
 
 		filepath = "/data/nba/nba_game_server/app/config_data_tw/server_config_TW_PROD.js"
-		filepath_bk = "/tmp/server_config_TW_PROD.bk.js"
+		filepath_bk = "/tmp/server_config_TW_PROD.bk." + timestamp + ".js"
 	}
 	if ip != "" {
 		filedata.ips = strings.Split(ip, ",")
