@@ -36,7 +36,7 @@ type Configfile struct {
 //###############重启gmtool##########################
 //###################################################
 
-func reload_gm() {
+func reload_gm(interface{}) {
 	argv2 := []string{"/nba/gm_reload.pl"}
 	c2 := exec.Command("perl", argv2...)
 	d2, err1 := c2.Output()
@@ -46,6 +46,63 @@ func reload_gm() {
 	}
 	logger.Println(d2)
 
+}
+
+func reload_cdn() {
+
+	if target == "cn" {
+
+	}
+	if target == "cn2015" {
+		url_i := "http://download-nba2015-c.mobage.cn:8400/1/ios/StaticData/StaticData_" + static_version + "_0.unity3d"
+		url_a := "http://download-nba2015-c.mobage.cn:8400/1/android/StaticData/StaticData_" + static_version + "_0.unity3d"
+
+		argv2 := []string{"/nba/cdn.py", url_i}
+		argv3 := []string{"/nba/cdn.py", url_a}
+		c2 := exec.Command("python", argv2...)
+		c3 := exec.Command("python", argv3...)
+		logger.Println("Start flush cdn ios for  ", static_version)
+		printlog(c2)
+		logger.Println("flush cdn ios Done")
+		logger.Println("Start flush cdn android for  ", static_version)
+		printlog(c3)
+		logger.Println("flush cdn android Done")
+
+	}
+	if target == "tw" {
+
+	}
+
+	argv2 := []string{"/nba/cdn.py", "-s", "ca", "-w", "1", "-t", "web", "-o", "restart", "-a", "yes"}
+	c2 := exec.Command("python", argv2...)
+
+	logger.Println("Start restart calculation ")
+	printlog(c2)
+	logger.Println("restart calculation server Done")
+}
+
+//###################################################
+//###############打印os/exec调用系统命令的返回##########
+//###################################################
+
+func printlog(c2 *exec.Cmd) {
+	stdout, err := c2.StdoutPipe()
+	if err != nil {
+		logger.Println(err.Error())
+		os.Exit(1)
+	}
+	if err := c2.Start(); err != nil {
+		logger.Println("Command  error:", err.Error())
+		os.Exit(1)
+	}
+	in := bufio.NewScanner(stdout)
+	for in.Scan() {
+		logger.Println(in.Text())
+	}
+	if err := in.Err(); err != nil {
+		logger.Println("Err:", err.Error())
+		os.Exit(1)
+	}
 }
 
 //###################################################
@@ -144,7 +201,8 @@ func reload_instance(reload_mode string) {
 		argv1 := []string{"/nba/nba.pl", "-s", "gs", "-w", "1", "-t", "web", "-o", "restart", "-a", "yes"}
 		c1 := exec.Command("perl", argv1...)
 		logger.Println("Start restart node server")
-		stdout, err := c1.StdoutPipe()
+
+		/*stdout, err := c1.StdoutPipe()
 		if err != nil {
 			logger.Println(err.Error())
 			os.Exit(1)
@@ -161,6 +219,8 @@ func reload_instance(reload_mode string) {
 			logger.Println("Err:", err.Error())
 			os.Exit(1)
 		}
+		*/
+		printlog(c1)
 		logger.Println("restart node server Done")
 
 	}
@@ -168,7 +228,8 @@ func reload_instance(reload_mode string) {
 		argv2 := []string{"/nba/nba.pl", "-s", "ca", "-w", "1", "-t", "web", "-o", "restart", "-a", "yes"}
 		c2 := exec.Command("perl", argv2...)
 		logger.Println("Start restart calculation ")
-		stdout, err := c2.StdoutPipe()
+
+		/*stdout, err := c2.StdoutPipe()
 		if err != nil {
 			logger.Println(err.Error())
 			os.Exit(1)
@@ -185,6 +246,8 @@ func reload_instance(reload_mode string) {
 			logger.Println("Err:", err.Error())
 			os.Exit(1)
 		}
+		*/
+		printlog(c2)
 		logger.Println("restart calculation server Done")
 
 	}
@@ -192,45 +255,51 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart CN 8200 login")
-		stdout, err := c3.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c3.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+		/*
+			stdout, err := c3.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c3.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in := bufio.NewScanner(stdout)
+			for in.Scan() {
+				logger.Println(in.Text())
+			}
+			if err := in.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c3)
 		logger.Println("restart login CN 8200 Done")
 
 		argv4 := []string{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8100", "-o", "restart"}
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart CN 8100 login")
-		stdout1, err := c4.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c4.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in1 := bufio.NewScanner(stdout1)
-		for in1.Scan() {
-			logger.Println(in1.Text())
-		}
-		if err := in1.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+		/*
+			stdout1, err := c4.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c4.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in1 := bufio.NewScanner(stdout1)
+			for in1.Scan() {
+				logger.Println(in1.Text())
+			}
+			if err := in1.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c4)
 		logger.Println("restart login CN 8100 Done")
 
 	}
@@ -239,45 +308,52 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "nba2015_login1", "nba2015_login2", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart 2015 8200 login")
-		stdout, err := c3.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c3.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+		/*
+			stdout, err := c3.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c3.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in := bufio.NewScanner(stdout)
+			for in.Scan() {
+				logger.Println(in.Text())
+			}
+			if err := in.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c3)
 		logger.Println("restart login 2015 8200 Done")
 
 		argv4 := []string{"/nba/nba.pl", "--host", "nba2015_login1", "nba2015_login2", "-t", "login", "-p", "8100", "-o", "restart"}
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart 2015 8100 login")
-		stdout1, err := c4.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c4.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in1 := bufio.NewScanner(stdout1)
-		for in1.Scan() {
-			logger.Println(in1.Text())
-		}
-		if err := in1.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+
+		/*
+			stdout1, err := c4.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c4.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in1 := bufio.NewScanner(stdout1)
+			for in1.Scan() {
+				logger.Println(in1.Text())
+			}
+			if err := in1.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c4)
 		logger.Println("restart login 2015 8100 Done")
 
 	}
@@ -285,45 +361,51 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "twnba_login1", "twnba_login2", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart TW 8200 login")
-		stdout, err := c3.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c3.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+		/*
+			stdout, err := c3.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c3.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in := bufio.NewScanner(stdout)
+			for in.Scan() {
+				logger.Println(in.Text())
+			}
+			if err := in.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c3)
 		logger.Println("restart login TW 8200 Done")
 
 		argv4 := []string{"/nba/nba.pl", "--host", "twnba_login1", "twnba_login2", "-t", "login", "-p", "8100", "-o", "restart"}
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart TW 8100 login")
-		stdout1, err := c4.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c4.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in1 := bufio.NewScanner(stdout1)
-		for in1.Scan() {
-			logger.Println(in1.Text())
-		}
-		if err := in1.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
+		/*
+			stdout1, err := c4.StdoutPipe()
+			if err != nil {
+				logger.Println(err.Error())
+				os.Exit(1)
+			}
+			if err := c4.Start(); err != nil {
+				logger.Println("Command  error:", err.Error())
+				os.Exit(1)
+			}
+			in1 := bufio.NewScanner(stdout1)
+			for in1.Scan() {
+				logger.Println(in1.Text())
+			}
+			if err := in1.Err(); err != nil {
+				logger.Println("Err:", err.Error())
+				os.Exit(1)
+			}
+		*/
+		printlog(c4)
 		logger.Println("restart login TW 8100 Done")
 
 	}
@@ -353,23 +435,26 @@ func pull_code() {
 	*/
 	//输出到logger
 	logger.Println("Start full code on node servers")
-	stdout, err := c.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c.Start(); err != nil {
-		logger.Println("Command Start error:", err.Error())
-		os.Exit(1)
-	}
-	in := bufio.NewScanner(stdout)
-	for in.Scan() {
-		logger.Println(in.Text())
-	}
-	if err := in.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout, err := c.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c.Start(); err != nil {
+			logger.Println("Command Start error:", err.Error())
+			os.Exit(1)
+		}
+		in := bufio.NewScanner(stdout)
+		for in.Scan() {
+			logger.Println(in.Text())
+		}
+		if err := in.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c)
 	logger.Println("pull code on node servers Done")
 
 	//###################################################
@@ -378,23 +463,26 @@ func pull_code() {
 	logger.Println("Start full code on redis servers")
 	argv1 := []string{"/nba/full.git.zl", "redis", "pull"}
 	c1 := exec.Command("perl", argv1...)
-	stdout1, err := c1.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c1.Start(); err != nil {
-		logger.Println("Command Start error:", err.Error())
-		os.Exit(1)
-	}
-	in1 := bufio.NewScanner(stdout1)
-	for in1.Scan() {
-		logger.Println(in1.Text())
-	}
-	if err := in1.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout1, err := c1.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c1.Start(); err != nil {
+			logger.Println("Command Start error:", err.Error())
+			os.Exit(1)
+		}
+		in1 := bufio.NewScanner(stdout1)
+		for in1.Scan() {
+			logger.Println(in1.Text())
+		}
+		if err := in1.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c1)
 	logger.Println("pull code on redis servers Done")
 
 	//###################################################
@@ -403,44 +491,51 @@ func pull_code() {
 	logger.Println("Start full code on login servers")
 	argv2 := []string{"/nba/full.git.zl", "login", "pull", "8100"}
 	c2 := exec.Command("perl", argv2...)
-	stdout2, err := c2.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c2.Start(); err != nil {
-		logger.Println("Command Start error:", err.Error())
-		os.Exit(1)
-	}
-	in2 := bufio.NewScanner(stdout2)
-	for in2.Scan() {
-		logger.Println(in2.Text())
-	}
-	if err := in2.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout2, err := c2.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c2.Start(); err != nil {
+			logger.Println("Command Start error:", err.Error())
+			os.Exit(1)
+		}
+		in2 := bufio.NewScanner(stdout2)
+		for in2.Scan() {
+			logger.Println(in2.Text())
+		}
+		if err := in2.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c2)
 	logger.Println("pull code on login 8100 Done")
 
 	argv3 := []string{"/nba/full.git.zl", "login", "pull"}
 	c3 := exec.Command("perl", argv3...)
-	stdout3, err := c3.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c3.Start(); err != nil {
-		logger.Println("Command Start error:", err.Error())
-		os.Exit(1)
-	}
-	in3 := bufio.NewScanner(stdout3)
-	for in3.Scan() {
-		logger.Println(in3.Text())
-	}
-	if err := in3.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+
+	/*
+		stdout3, err := c3.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c3.Start(); err != nil {
+			logger.Println("Command Start error:", err.Error())
+			os.Exit(1)
+		}
+		in3 := bufio.NewScanner(stdout3)
+		for in3.Scan() {
+			logger.Println(in3.Text())
+		}
+		if err := in3.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c3)
 	logger.Println("pull code on login 8200 Done")
 
 }
@@ -454,23 +549,26 @@ func pull_s(static_version string) {
 	argv := []string{"/nba/scp_staticdata.pl", "-n", static_version}
 	c := exec.Command("perl", argv...)
 	logger.Println("Start scp statiscdata")
-	stdout, err := c.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in := bufio.NewScanner(stdout)
-	for in.Scan() {
-		logger.Println(in.Text())
-	}
-	if err := in.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout, err := c.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in := bufio.NewScanner(stdout)
+		for in.Scan() {
+			logger.Println(in.Text())
+		}
+		if err := in.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c)
 	logger.Println("pull static file Done")
 }
 
@@ -482,23 +580,26 @@ func pull_h(hotfix_version string) {
 	argv := []string{"/nba/scp_hotfix.pl", "-n", hotfix_version}
 	c := exec.Command("perl", argv...)
 	logger.Println("Start scp hotfix file")
-	stdout, err := c.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in := bufio.NewScanner(stdout)
-	for in.Scan() {
-		logger.Println(in.Text())
-	}
-	if err := in.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout, err := c.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in := bufio.NewScanner(stdout)
+		for in.Scan() {
+			logger.Println(in.Text())
+		}
+		if err := in.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c)
 	logger.Println("pull hotfix file Done")
 }
 
@@ -522,23 +623,27 @@ func git_pull(filepath string) {
 	argv := []string{"pull"}
 	c := exec.Command("git", argv...)
 	logger.Println("Start pull code localhost")
-	stdout, err := c.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in := bufio.NewScanner(stdout)
-	for in.Scan() {
-		logger.Println(in.Text())
-	}
-	if err := in.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout, err := c.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in := bufio.NewScanner(stdout)
+		for in.Scan() {
+			logger.Println(in.Text())
+		}
+		if err := in.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c)
+	logger.Println("local git pull Done")
 }
 
 //###################################################
@@ -553,66 +658,76 @@ func git_push(path string, filepath1 string) {
 	argv3 := []string{"push"}
 	logger.Println("start git add")
 	c1 := exec.Command("git", argv1...)
-
-	stdout, err := c1.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c1.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in := bufio.NewScanner(stdout)
-	for in.Scan() {
-		logger.Println(in.Text())
-	}
-	if err := in.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout, err := c1.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c1.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in := bufio.NewScanner(stdout)
+		for in.Scan() {
+			logger.Println(in.Text())
+		}
+		if err := in.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c1)
+	logger.Println("Git add done")
 
 	logger.Println("start git commit")
 	c2 := exec.Command("git", argv2...)
 
-	stdout2, err := c2.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c2.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in2 := bufio.NewScanner(stdout2)
-	for in2.Scan() {
-		logger.Println(in2.Text())
-	}
-	if err := in2.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout2, err := c2.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c2.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in2 := bufio.NewScanner(stdout2)
+		for in2.Scan() {
+			logger.Println(in2.Text())
+		}
+		if err := in2.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c2)
+	logger.Println("Git commit Done")
 
 	logger.Println("start git push")
 	c3 := exec.Command("git", argv3...)
-
-	stdout3, err := c3.StdoutPipe()
-	if err != nil {
-		logger.Println(err.Error())
-		os.Exit(1)
-	}
-	if err := c3.Start(); err != nil {
-		logger.Println("Command  error:", err.Error())
-		os.Exit(1)
-	}
-	in3 := bufio.NewScanner(stdout3)
-	for in3.Scan() {
-		logger.Println(in3.Text())
-	}
-	if err := in3.Err(); err != nil {
-		logger.Println("Err:", err.Error())
-		os.Exit(1)
-	}
+	/*
+		stdout3, err := c3.StdoutPipe()
+		if err != nil {
+			logger.Println(err.Error())
+			os.Exit(1)
+		}
+		if err := c3.Start(); err != nil {
+			logger.Println("Command  error:", err.Error())
+			os.Exit(1)
+		}
+		in3 := bufio.NewScanner(stdout3)
+		for in3.Scan() {
+			logger.Println(in3.Text())
+		}
+		if err := in3.Err(); err != nil {
+			logger.Println("Err:", err.Error())
+			os.Exit(1)
+		}
+	*/
+	printlog(c3)
+	logger.Println("git push Done")
 
 }
 
