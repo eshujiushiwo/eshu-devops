@@ -39,12 +39,37 @@ type Configfile struct {
 func reload_gm(interface{}) {
 	argv2 := []string{"/nba/gm_reload.pl"}
 	c2 := exec.Command("perl", argv2...)
-	d2, err1 := c2.Output()
-	if err1 != nil {
-		logger.Println(err1.Error())
-		os.Exit(1)
+	logger.Println("Start restart gm tools")
+	printlog(c2)
+	logger.Println("restart gm tools pls check")
+
+}
+func backup() {
+	if target == "cn" {
+		removepath("/data/zhou/nba_game_server_bak")
+		argv2 := []string{"-r", "/data/zhou/nba_game_server", "/data/zhou/nba_game_server_bak"}
+		c2 := exec.Command("cp", argv2...)
+		logger.Println("Start backup code")
+		printlog(c2)
+		logger.Println("backup code Done")
+
 	}
-	logger.Println(d2)
+	if target == "cn2015" {
+		removepath("/data/zhou/nba_game_server_bak")
+		argv2 := []string{"-r", "/data/zhou/nba_game_server", "/data/zhou/nba_game_server_bak"}
+		c2 := exec.Command("cp", argv2...)
+		logger.Println("Start backup code")
+		printlog(c2)
+		logger.Println("backup code Done")
+	}
+	if target == "tw" {
+		removepath("/data/nba/nba_game_server_bak")
+		argv2 := []string{"-r", "/data/nba/nba_game_server", "/data/nba/nba_game_server_bak"}
+		c2 := exec.Command("cp", argv2...)
+		logger.Println("Start backup code")
+		printlog(c2)
+		logger.Println("backup code Done")
+	}
 
 }
 
@@ -202,24 +227,6 @@ func reload_instance(reload_mode string) {
 		c1 := exec.Command("perl", argv1...)
 		logger.Println("Start restart node server")
 
-		/*stdout, err := c1.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c1.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-		*/
 		printlog(c1)
 		logger.Println("restart node server Done")
 
@@ -229,24 +236,6 @@ func reload_instance(reload_mode string) {
 		c2 := exec.Command("perl", argv2...)
 		logger.Println("Start restart calculation ")
 
-		/*stdout, err := c2.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c2.Start(); err != nil {
-			logger.Println("Command  error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-		*/
 		printlog(c2)
 		logger.Println("restart calculation server Done")
 
@@ -255,50 +244,14 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart CN 8200 login")
-		/*
-			stdout, err := c3.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c3.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in := bufio.NewScanner(stdout)
-			for in.Scan() {
-				logger.Println(in.Text())
-			}
-			if err := in.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
+
 		printlog(c3)
 		logger.Println("restart login CN 8200 Done")
 
 		argv4 := []string{"/nba/nba.pl", "--host", "nba_login1", "nba_login2", "nba_login3", "-t", "login", "-p", "8100", "-o", "restart"}
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart CN 8100 login")
-		/*
-			stdout1, err := c4.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c4.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in1 := bufio.NewScanner(stdout1)
-			for in1.Scan() {
-				logger.Println(in1.Text())
-			}
-			if err := in1.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
+
 		printlog(c4)
 		logger.Println("restart login CN 8100 Done")
 
@@ -308,25 +261,7 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "nba2015_login1", "nba2015_login2", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart 2015 8200 login")
-		/*
-			stdout, err := c3.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c3.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in := bufio.NewScanner(stdout)
-			for in.Scan() {
-				logger.Println(in.Text())
-			}
-			if err := in.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
+
 		printlog(c3)
 		logger.Println("restart login 2015 8200 Done")
 
@@ -334,25 +269,6 @@ func reload_instance(reload_mode string) {
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart 2015 8100 login")
 
-		/*
-			stdout1, err := c4.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c4.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in1 := bufio.NewScanner(stdout1)
-			for in1.Scan() {
-				logger.Println(in1.Text())
-			}
-			if err := in1.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
 		printlog(c4)
 		logger.Println("restart login 2015 8100 Done")
 
@@ -361,50 +277,14 @@ func reload_instance(reload_mode string) {
 		argv3 := []string{"/nba/nba.pl", "--host", "twnba_login1", "twnba_login2", "-t", "login", "-p", "8200", "-o", "restart"}
 		c3 := exec.Command("perl", argv3...)
 		logger.Println("Start restart TW 8200 login")
-		/*
-			stdout, err := c3.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c3.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in := bufio.NewScanner(stdout)
-			for in.Scan() {
-				logger.Println(in.Text())
-			}
-			if err := in.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
+
 		printlog(c3)
 		logger.Println("restart login TW 8200 Done")
 
 		argv4 := []string{"/nba/nba.pl", "--host", "twnba_login1", "twnba_login2", "-t", "login", "-p", "8100", "-o", "restart"}
 		c4 := exec.Command("perl", argv4...)
 		logger.Println("Start restart TW 8100 login")
-		/*
-			stdout1, err := c4.StdoutPipe()
-			if err != nil {
-				logger.Println(err.Error())
-				os.Exit(1)
-			}
-			if err := c4.Start(); err != nil {
-				logger.Println("Command  error:", err.Error())
-				os.Exit(1)
-			}
-			in1 := bufio.NewScanner(stdout1)
-			for in1.Scan() {
-				logger.Println(in1.Text())
-			}
-			if err := in1.Err(); err != nil {
-				logger.Println("Err:", err.Error())
-				os.Exit(1)
-			}
-		*/
+
 		printlog(c4)
 		logger.Println("restart login TW 8100 Done")
 
@@ -415,128 +295,65 @@ func reload_instance(reload_mode string) {
 //###############批量更新服务器代码#####################
 //###################################################
 
-func pull_code() {
+func pull_code(pull_mode string) {
 
-	//###################################################
-	//###############开始为node服务器更新代码###############
-	//###################################################
-	argv := []string{"/nba/full.git.zl", "node", "pull"}
-	c := exec.Command("perl", argv...)
+	if pull_mode == "all" {
+		//###################################################
+		//###############开始为node服务器更新代码###############
+		//###################################################
+		argv := []string{"/nba/full.git.zl", "node", "pull"}
+		c := exec.Command("perl", argv...)
 
-	//只输出到屏幕不记录log的简单方法
-	/*
-		c.Stdout = os.Stdout
-		c.Stderr = os.Stderr
-		err := c.Run()
-		if err != nil {
-			logger.Println(err.Error())
-			return
-		}
-	*/
-	//输出到logger
-	logger.Println("Start full code on node servers")
-	/*
-		stdout, err := c.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c.Start(); err != nil {
-			logger.Println("Command Start error:", err.Error())
-			os.Exit(1)
-		}
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.Println(in.Text())
-		}
-		if err := in.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-	*/
-	printlog(c)
-	logger.Println("pull code on node servers Done")
+		logger.Println("Start full code on node servers")
 
-	//###################################################
-	//###############开始为redis服务器更新代码##############
-	//###################################################
-	logger.Println("Start full code on redis servers")
-	argv1 := []string{"/nba/full.git.zl", "redis", "pull"}
-	c1 := exec.Command("perl", argv1...)
-	/*
-		stdout1, err := c1.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c1.Start(); err != nil {
-			logger.Println("Command Start error:", err.Error())
-			os.Exit(1)
-		}
-		in1 := bufio.NewScanner(stdout1)
-		for in1.Scan() {
-			logger.Println(in1.Text())
-		}
-		if err := in1.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-	*/
-	printlog(c1)
-	logger.Println("pull code on redis servers Done")
+		printlog(c)
+		logger.Println("pull code on node servers Done")
 
-	//###################################################
-	//###############开始为login服务器更新代码##############
-	//###################################################
-	logger.Println("Start full code on login servers")
-	argv2 := []string{"/nba/full.git.zl", "login", "pull", "8100"}
-	c2 := exec.Command("perl", argv2...)
-	/*
-		stdout2, err := c2.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c2.Start(); err != nil {
-			logger.Println("Command Start error:", err.Error())
-			os.Exit(1)
-		}
-		in2 := bufio.NewScanner(stdout2)
-		for in2.Scan() {
-			logger.Println(in2.Text())
-		}
-		if err := in2.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-	*/
-	printlog(c2)
-	logger.Println("pull code on login 8100 Done")
+		//###################################################
+		//###############开始为redis服务器更新代码##############
+		//###################################################
+		logger.Println("Start full code on redis servers")
+		argv1 := []string{"/nba/full.git.zl", "redis", "pull"}
+		c1 := exec.Command("perl", argv1...)
 
-	argv3 := []string{"/nba/full.git.zl", "login", "pull"}
-	c3 := exec.Command("perl", argv3...)
+		printlog(c1)
+		logger.Println("pull code on redis servers Done")
 
-	/*
-		stdout3, err := c3.StdoutPipe()
-		if err != nil {
-			logger.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := c3.Start(); err != nil {
-			logger.Println("Command Start error:", err.Error())
-			os.Exit(1)
-		}
-		in3 := bufio.NewScanner(stdout3)
-		for in3.Scan() {
-			logger.Println(in3.Text())
-		}
-		if err := in3.Err(); err != nil {
-			logger.Println("Err:", err.Error())
-			os.Exit(1)
-		}
-	*/
-	printlog(c3)
-	logger.Println("pull code on login 8200 Done")
+		//###################################################
+		//###############开始为login服务器更新代码##############
+		//###################################################
+		logger.Println("Start full code on login servers")
+		argv2 := []string{"/nba/full.git.zl", "login", "pull", "8100"}
+		c2 := exec.Command("perl", argv2...)
+
+		printlog(c2)
+		logger.Println("pull code on login 8100 Done")
+
+		argv3 := []string{"/nba/full.git.zl", "login", "pull"}
+		c3 := exec.Command("perl", argv3...)
+
+		printlog(c3)
+		logger.Println("pull code on login 8200 Done")
+	}
+	if pull_mode == "login" {
+
+		//###################################################
+		//###############开始为login服务器更新代码##############
+		//###################################################
+		logger.Println("Start full code on login servers")
+		argv2 := []string{"/nba/full.git.zl", "login", "pull", "8100"}
+		c2 := exec.Command("perl", argv2...)
+
+		printlog(c2)
+		logger.Println("pull code on login 8100 Done")
+
+		argv3 := []string{"/nba/full.git.zl", "login", "pull"}
+		c3 := exec.Command("perl", argv3...)
+
+		printlog(c3)
+		logger.Println("pull code on login 8200 Done")
+
+	}
 
 }
 
@@ -742,6 +559,17 @@ func removefle(path string) {
 	logger.Println("===remove ", path)
 }
 
+//删除目录
+func removepath(dir string) {
+	logger.Println("==start remove ", dir)
+	err1 := os.RemoveAll(dir)
+	if err1 != nil {
+		logger.Println(err1.Error())
+		os.Exit(1)
+	}
+	logger.Println("===remove ", dir)
+}
+
 //###################################################
 //###############备份配置文件##########################
 //###################################################
@@ -907,13 +735,14 @@ func main() {
 	//===Mode为1
 	//只更新静态数据版本
 	if mode == "1" && static_version != "" && hotfix_version == "" && target != "" {
+		backup()
 		git_pull(codepath)
 		filedata := filedata.copyconfig(filepath, filepath_bk)
 		filedata.changes_v()
 		filedata.writeconfig(filepath)
 		git_push(filepath, codepath)
 		pull_s(static_version)
-		pull_code()
+		pull_code("all")
 		if target == "cn2015" {
 			reload_instance("login2015")
 		}
@@ -928,13 +757,14 @@ func main() {
 	}
 	//只更新hotfix 版本
 	if mode == "1" && static_version == "" && hotfix_version != "" && target != "" {
+		backup()
 		git_pull(codepath)
 		filedata := filedata.copyconfig(filepath, filepath_bk)
 		filedata.changeh_v()
 		filedata.writeconfig(filepath)
 		git_push(filepath, codepath)
 		pull_h(hotfix_version)
-		pull_code()
+		pull_code("login")
 		if target == "cn2015" {
 			reload_instance("login2015")
 		}
@@ -949,6 +779,7 @@ func main() {
 	}
 	//同时更新静态数据与hotfix
 	if mode == "1" && static_version != "" && hotfix_version != "" && target != "" {
+		backup()
 		git_pull(codepath)
 		filedata := filedata.copyconfig(filepath, filepath_bk)
 		filedata.changeh_v()
@@ -956,7 +787,7 @@ func main() {
 		filedata.writeconfig(filepath)
 		git_push(filepath, codepath)
 		pull_h(hotfix_version)
-		pull_code()
+		pull_code("all")
 		if target == "cn2015" {
 			reload_instance("login2015")
 		}
@@ -975,6 +806,7 @@ func main() {
 		logger.Println("Pls input the ip of new line")
 	}
 	if mode == "2" && ip != "" && server_id != "" && target != "" {
+		backup()
 		git_pull(codepath)
 		filedata := filedata.copyconfig(filepath, filepath_bk)
 		filedata.addnew_line(filepath, server_id)
